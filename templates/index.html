@@ -329,11 +329,27 @@
   function addBubble(role, html, rawText = "") {
     const div = document.createElement("div");
     div.className = `msg ${role}`;
-    const emoji    = role === "bot" ? "🤰" : "👤";
-    const ttsBtn   = (role === "bot" && rawText)
-      ? `<button class="play-btn" onclick="speakText(this,\`${rawText.replace(/`/g,"'").replace(/\n/g," ").substring(0,1000)}\`)">🔊 Play</button>`
-      : "";
-    div.innerHTML = `<div class="avatar">${emoji}</div><div class="bubble">${html}${ttsBtn}</div>`;
+    
+    const avatar = document.createElement("div");
+    avatar.className = "avatar";
+    avatar.textContent = role === "bot" ? "🤰" : "👤";
+    
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
+    bubble.innerHTML = html;
+
+    if (role === "bot" && rawText) {
+      const btn = document.createElement("button");
+      btn.className = "play-btn";
+      btn.textContent = "🔊 Play";
+      btn.addEventListener("click", function() {
+        speakText(this, rawText);
+      });
+      bubble.appendChild(btn);
+    }
+
+    div.appendChild(avatar);
+    div.appendChild(bubble);
     chat.appendChild(div);
     scrollBottom();
     return div;
@@ -410,7 +426,10 @@
       btn.textContent = "⏹ Stop"; btn.classList.add("playing");
       audio.onended = () => { btn.textContent = "🔊 Play"; btn.classList.remove("playing"); currentAudio = null; };
     }
-    audio.play().catch(() => setStatus("TTS blocked — click anywhere first.", "err"));
+    audio.play().catch((err) => {
+      console.error("Audio playback error:", err);
+      setStatus("Audio error: " + err.name + " - " + err.message, "err");
+    });
   }
 
   async function toggleMic() {
