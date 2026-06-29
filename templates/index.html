@@ -419,16 +419,42 @@
   }
 
   function speakText(btn, text) {
+    // If the button is currently playing, we just want to stop it.
+    if (btn && btn.classList.contains("playing")) {
+      if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+      btn.textContent = "🔊 Play"; btn.classList.remove("playing");
+      return; // Stop here, don't start a new playback
+    }
+
+    // Otherwise, stop any existing audio and start a new one
     if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+    
     const audio = new Audio(`/api/text-to-speech?text=${encodeURIComponent(text)}&lang=en`);
     currentAudio = audio;
+    
     if (btn) {
       btn.textContent = "⏹ Stop"; btn.classList.add("playing");
-      audio.onended = () => { btn.textContent = "🔊 Play"; btn.classList.remove("playing"); currentAudio = null; };
+      audio.onended = () => { 
+        btn.textContent = "🔊 Play"; 
+        btn.classList.remove("playing"); 
+        currentAudio = null; 
+      };
     }
-    audio.play().catch((err) => {
-      console.error("Audio playback error:", err);
-      setStatus("Audio error: " + err.name + " - " + err.message, "err");
+    
+    setStatus("Loading audio...", "busy");
+    
+    audio.play().then(() => {
+      setStatus("", ""); // Clear loading status once playing starts
+    }).catch((err) => {
+      // Ignore AbortError as it happens normally when we pause() during loading
+      if (err.name !== "AbortError") {
+        console.error("Audio playback error:", err);
+        setStatus("Audio error: " + err.name + " - " + err.message, "err");
+      }
+      if (btn) {
+        btn.textContent = "🔊 Play"; 
+        btn.classList.remove("playing");
+      }
     });
   }
 
