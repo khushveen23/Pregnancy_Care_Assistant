@@ -272,7 +272,7 @@
 
   <!-- Input bar -->
   <div class="input-bar">
-    <button id="ttsToggle" class="icon-btn active" title="Toggle voice output" onclick="toggleTTS()">🔊</button>
+    <button id="ttsToggle" class="icon-btn" title="Toggle voice output" onclick="toggleTTS()">🔇</button>
     <button id="micBtn"    class="icon-btn"        title="Click to record voice" onclick="toggleMic()">🎤</button>
     <textarea id="question" rows="1" placeholder="Type a pregnancy question..." onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
     <button id="sendBtn" class="icon-btn" title="Send" onclick="sendQuestion()">➤</button>
@@ -281,7 +281,7 @@
 </div>
 
 <script>
-  let ttsEnabled    = true;
+  let ttsEnabled    = false;
   let mediaRecorder = null;
   let audioChunks   = [];
   let isRecording   = false;
